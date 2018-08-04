@@ -1,0 +1,32 @@
+{
+  "name": "cali-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "config": "^1.30.0",
+    "cookie-session": "^2.0.0-beta.3",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "express-jwt": "^5.3.1",
+    "google-auth-library": "^1.6.1",
+    "googleapis": "^32.0.0",
+    "http-errors": "^1.6.3",
+    "jsonwebtoken": "^8.3.0",
+    "lodash": "^4.17.10",
+    "pg": "^7.4.3",
+    "sequelize": "4",
+    "supertest": "^3.1.0"
+  },
+  "scripts": {
+    "db:bootstrap": "node ./scripts/bootstrapDB.js",
+    "test": "mocha ./test/**/*.test.js"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "mocha": "^5.2.0",
+    "sinon": "^6.1.4"
+  }
+}

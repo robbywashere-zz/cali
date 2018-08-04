@@ -1,0 +1,11 @@
+node_modules
+.next
+.db
+.env
+.tmp
+.nyc_output
+.nyc_output/
+*.pyc
+.minio-test-data
+__pycache__
+yarn-error.log
