@@ -5,7 +5,7 @@ const config = require('config');
 const dbSync = require('./db/sync');
 const { User, GoogleAccount } = require('./models'); 
 const { Unauthorized, NotFound } = require('http-errors'); 
-const { GoogleAuthMiddleware } = require('./auth/passport');
+const { GoogleAuth } = require('./auth/passport');
 
 //const GoogleAuth = require('./auth');
 //app.use(GoogleAuth.route({ login: '/google_login' }));
@@ -27,7 +27,7 @@ async function Server(){
 
   app.use(require('body-parser').json());
 
-  app.use(GoogleAuthMiddleware());
+  app.use(GoogleAuth());
 
   app.use('/api',jwtMiddleware({ protect: api() }));
 
