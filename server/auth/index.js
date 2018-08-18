@@ -19,9 +19,9 @@ function client({
   );
 }
 
-function route({ login, callback = config.get('G_REDIRECT_PATH'), gclient = client }){
+function route({ login, callback = config.get('G_REDIRECT_PATH'), Client = client }){
 
-  const GAClient = ()=> gclient();
+  const GAClient = ()=> Client({ redirectPath: callback });
 
   const router = new Router();
 
@@ -56,14 +56,15 @@ function catcher(client) {
 
   return async (req, res, next) => {
 
-
     try {
+
       const { code } = req.query;
 
       if (typeof code === "undefined") throw new BadRequest(`OAuth callback must have "code" query param`);
 
       const oac = client();
 
+      //get refresh tokens
       const { tokens } = await oac.getToken(code);
 
       oac.setCredentials(tokens);
@@ -72,10 +73,12 @@ function catcher(client) {
 
       const { data } = await oac.request({ url });
 
+      //extract profile
       const email = data.emails.find(email=>email.type === "account").value;
 
       const user = await User.findBy({ email });
 
+      //Create user WITH GoogleAccount
       if (!user) {
         await User.create({ 
           email,
@@ -85,6 +88,7 @@ function catcher(client) {
 
       const jwt = sign({ data: email });
 
+      //Saving jwt in cookie needed for persisting during redirect, quick lifetime ~60 seconds
       res.cookie('jwt', JSON.stringify(jwt), { maxAge: 60*1000, httpOnly: false });
 
       res.redirect(302, '/');
