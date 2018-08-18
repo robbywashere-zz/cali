@@ -3,10 +3,12 @@ const { middleware: jwtMiddleware } = require('./auth/jwt');
 const logger = require('./lib/logger');
 const config = require('config');
 const dbSync = require('./db/sync');
-const { User, Account } = require('./models'); 
+const { User, GoogleAccount } = require('./models'); 
 const { Unauthorized, NotFound } = require('http-errors'); 
+const { GoogleAuthMiddleware } = require('./auth/passport');
 
-const GoogleAuth = require('./auth');
+//const GoogleAuth = require('./auth');
+//app.use(GoogleAuth.route({ login: '/google_login' }));
 
 
 function api(){
@@ -25,7 +27,7 @@ async function Server(){
 
   app.use(require('body-parser').json());
 
-  app.use(GoogleAuth.route({ login: '/google_login' }));
+  app.use(GoogleAuthMiddleware());
 
   app.use('/api',jwtMiddleware({ protect: api() }));
 
