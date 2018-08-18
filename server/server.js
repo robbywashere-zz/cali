@@ -3,7 +3,6 @@ const { middleware: jwtMiddleware } = require('./auth/jwt');
 const logger = require('./lib/logger');
 const config = require('config');
 const dbSync = require('./db/sync');
-const cookieSession = require('cookie-session');
 const { User, Account } = require('./models'); 
 const { Unauthorized, NotFound } = require('http-errors'); 
 
@@ -18,15 +17,6 @@ function api(){
 }
 
 
-function ProtectWithAuth(req,res,next) {
-  try {
-    if (req.session.userId) next();
-    else throw new Unauthorized();
-  } catch(e) {
-    next(e);
-  }
-}
-
 async function Server(){
 
   await dbSync(true);
@@ -35,14 +25,7 @@ async function Server(){
 
   app.use(require('body-parser').json());
 
-
-  app.use('/auth',GoogleAuth({ 
-    clientId: config.get(`G_CLIENT_ID`),
-    clientSecret: config.get(`G_CLIENT_SECRET`),
-    redirectURL: config.get(`G_REDIRECT_URL`),
-    redirectPath:  config.get(`G_REDIRECT_PATH`)
-  }))
-
+  app.use(GoogleAuth.route({ login: '/login' }));
 
   app.use('/api',jwtMiddleware({ protect: api() }));
 

@@ -13,6 +13,8 @@ module.exports ={
       unique: true,
     },
   },
+  Scopes: {
+  },
   Init({ Account, Post, GoogleAccount }) {
     this.hasOne(GoogleAccount);
   },

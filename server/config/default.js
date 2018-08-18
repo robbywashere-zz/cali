@@ -2,6 +2,7 @@ require('dotenv').config();
 
 module.exports = {
   NODE_ENV: 'development',
+  BASE_URL: process.env.BASE_URL,
   PORT: process.env.PORT || 3000,
   G_CLIENT_ID: process.env.G_CLIENT_ID,
   G_CLIENT_SECRET: process.env.G_CLIENT_SECRET,

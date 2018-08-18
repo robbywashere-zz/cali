@@ -6,24 +6,36 @@ const { GoogleAccount, User } = require('../models');
 const { Router } = require('express');
 const config = require('config');
 
-
-function oaClient({ clientId, clientSecret, redirectURL } = {}){
+function client({
+  clientId = config.get(`G_CLIENT_ID`),
+  clientSecret = config.get(`G_CLIENT_SECRET`),
+  redirectPath = config.get(`G_REDIRECT_PATH`),
+  baseURL = config.get(`BASE_URL`),
+}={}) {
   return new OAuth2Client(
-    clientId || config.get(`G_CLIENT_ID`),
-    clientSecret || config.get(`G_CLIENT_SECRET`),
-    redirectURL || config.get(`G_REDIRECT_URL`)
+    clientId,
+    clientSecret,
+    `${baseURL}${redirectPath}`
   );
 }
 
-module.exports = function GoogleAuth({ clientId, clientSecret, redirectURL, redirectPath }){
+function route({ login, callback = config.get('G_REDIRECT_PATH'), gclient = client }){
+
+  const GAClient = ()=> gclient();
 
   const router = new Router();
 
+  router.get(login, auth(GAClient))
 
-  router.get('/g_login',function(req,res, next){
+  router.get(callback, catcher(GAClient))
 
-    const oac = oaClient({ redirectURL, redirectPath });
+  return router;
 
+}
+
+function auth(client) {
+  return (req,res,next)=> {
+    const oac = client();
     const authorizeUrl = oac.generateAuthUrl({
       // To get a refresh token, you MUST set access_type to `offline`.
       access_type: 'offline',
@@ -35,12 +47,14 @@ module.exports = function GoogleAuth({ clientId, clientSecret, redirectURL, redi
       // every time, forcing a refresh_token to be returned.
       prompt: ((process.env.NODE_ENV !== "production") ? 'consent' : undefined)
     });
-
     res.redirect(authorizeUrl);
+  }
+}
 
-  })
 
-  router.get(redirectPath, async function(req, res, next){
+function catcher(client) {
+
+  return async (req, res, next) => {
 
 
     try {
@@ -48,7 +62,7 @@ module.exports = function GoogleAuth({ clientId, clientSecret, redirectURL, redi
 
       if (typeof code === "undefined") throw new BadRequest(`OAuth callback must have "code" query param`);
 
-      const oac = oaClient();
+      const oac = client();
 
       const { tokens } = await oac.getToken(code);
 
@@ -60,7 +74,7 @@ module.exports = function GoogleAuth({ clientId, clientSecret, redirectURL, redi
 
       const email = data.emails.find(email=>email.type === "account").value;
 
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findBy({ email });
 
       if (!user) {
         await User.create({ 
@@ -80,9 +94,10 @@ module.exports = function GoogleAuth({ clientId, clientSecret, redirectURL, redi
       logger.error(e);
       next(e);
     }
-  });
-  return router;
+  };
 }
+
+module.exports = { client, auth, catcher, route }
 
 
 

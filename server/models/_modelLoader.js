@@ -31,6 +31,11 @@ function loadObject(model, registry) {
 
   modelClass._scopeFns = !!model.ScopeFunctions;
 
+  // findBy helper
+  modelClass.findBy = function findBy(where) {
+    return modelClass.findOne({ where });
+  }
+
   // update by id
   modelClass.updateById = function updateById(id, ups, q = {}, o) {
     q.where = { ...q.where, id };

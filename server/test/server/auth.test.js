@@ -1,6 +1,6 @@
 const express = require('express');
 
-const expressJwt = require('../../auth/expressJwt');
+const expressJwt = require('../../lib/expressJwt');
 
 const assert = require('assert');
 
@@ -8,7 +8,7 @@ const sinon = require('sinon');
 
 const models = require('../../models');
 
-const { middleware } = require('../../auth/jwt');
+//const { middleware } = require('../../auth/jwt');
 
 const request = require('supertest');
 
@@ -16,7 +16,16 @@ const server = require('../../server');
 
 describe('server auth', function(){
 
-  describe('#.middleware', function(){
+
+  describe('server middleware',function(){
+
+
+
+
+  });
+
+
+  describe('server module', function(){
 
     let sandbox;
     beforeEach(()=>{
@@ -43,10 +52,12 @@ describe('server auth', function(){
 
     it (`should allow "protect'ed" route when req.user is defined when getting /me`, async function(){
 
-      sandbox.stub(models.User,'findOne').callsFake(()=>({ email: 'x@x.com' }));
+      const email = 'x@x.com';
 
+      sandbox.stub(models.User,'findBy').callsFake(()=>({ email }));
+      
       sandbox.stub(expressJwt,'jwt').returns((req,res,next)=>{
-        req.user = {};
+        req.user = { data: { email } };
         next();
       });
 
@@ -58,7 +69,9 @@ describe('server auth', function(){
 
       const resp = await request(app).get('/api/me').expect(200);
 
-      assert.equal(resp.body.email, 'x@x.com');
+      assert.equal(models.User.findBy.getCall(0).args[0].email,email)
+
+      assert.equal(resp.body.email, email);
 
     })
 
