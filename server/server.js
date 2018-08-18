@@ -25,7 +25,7 @@ async function Server(){
 
   app.use(require('body-parser').json());
 
-  app.use(GoogleAuth.route({ login: '/login' }));
+  app.use(GoogleAuth.route({ login: '/google_login' }));
 
   app.use('/api',jwtMiddleware({ protect: api() }));
 
@@ -49,7 +49,8 @@ if (require.main === module) {
       const app = await Server();
       app.listen(PORT, ()=> logger.log(`Listening on ${PORT}`))
     } catch(e) {
-      logger.error(`Could not start server \n ${e}`);
+      logger.error(`Could not start server.`);
+      logger.error(e);
     }
   })()
 }
